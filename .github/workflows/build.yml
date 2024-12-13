@@ -1,0 +1,48 @@
+name: Build SmartDNS Conf
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 22 * * *"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone dnsmasq-china-list repo
+        uses: GuillaumeFalourd/clone-github-repo-action@v2.3
+        with:
+          depth: 1
+          branch: 'master'
+          owner: 'felixonmars'
+          repository: 'dnsmasq-china-list'
+
+      - name: Build AdGuardHome Conf
+        run: |
+          cd dnsmasq-china-list
+          make SERVER="116.228.111.118 180.168.255.18" adguardhome
+          cp *.adguardhome.conf /tmp
+
+      - name: Checkout
+        uses: actions/checkout@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN  }}
+
+      - name: Merge files
+        run: |
+          cp /tmp/*.adguardhome.conf .
+          (cat accelerated-domains.china.adguardhome.conf; echo ""; cat apple.china.adguardhome.conf;echo ""; cat custom.adguardhome.conf) > dns_mapping_adguardhome.conf
+
+      - name: Add & Commit
+        uses: EndBug/add-and-commit@v9.1.4
+        with:
+          message: 'Update AdGuardHome Conf'
+
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 0
+          keep_minimum_runs: 0
