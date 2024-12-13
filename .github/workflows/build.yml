@@ -1,4 +1,4 @@
-name: Build SmartDNS Conf
+name: Build AdGuardHome Conf
 
 on:
   workflow_dispatch:
