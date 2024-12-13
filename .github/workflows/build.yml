@@ -37,6 +37,7 @@ jobs:
       - name: Add & Commit
         uses: EndBug/add-and-commit@v9.1.4
         with:
+          add: dns_mapping_adguardhome.conf
           message: 'Update AdGuardHome Conf'
 
       - name: Delete workflow runs
